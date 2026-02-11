@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpsLine — Enterprise DevOps, Managed & Delivered</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f7fa;
+  --bg-elevated: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.72);
+  --bg-card-hover: rgba(255, 255, 255, 0.88);
+  --border: rgba(255, 255, 255, 0.9);
+  --border-accent: rgba(59, 130, 246, 0.25);
+  --text: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+  --accent: #2563eb;
+  --accent-bright: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.12);
+  --accent-glow-strong: rgba(59, 130, 246, 0.2);
+  --green: #059669;
+  --green-glow: rgba(5, 150, 105, 0.1);
+  --orange: #d97706;
+  --orange-glow: rgba(217, 119, 6, 0.1);
+  --purple: #7c3aed;
+  --purple-glow: rgba(124, 58, 237, 0.1);
+  --red: #dc2626;
+  --glass: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.08);
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── GLOBAL NOISE TEXTURE (subtle on light) ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.015'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ─── GRID BACKGROUND (light theme) ──────────── */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 30%, black 10%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ─── UTILITY ────────────────────────── */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.container-wide { max-width: 1400px; margin: 0 auto; padding: 0 32px; }
+
+.section {
+  padding: 88px 0;
+  position: relative;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-label::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+  font-size: 18px;
+  color: var(--text-muted);
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+/* ─── NAVIGATION ─────────────────────── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 0 32px;
+  transition: all 0.4s ease;
+  background: #0d0d0d;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+nav.scrolled {
+  background: rgba(13, 13, 13, 0.95);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+.nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+}
+.nav-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #fff;
+}
+.nav-logo-img {
+  height: 32px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  transition: filter 0.3s ease;
+  filter: none;
+}
+[data-theme="light"] .nav-logo-img { filter: invert(1); }
+[data-theme="dark"] .nav-logo-img { filter: none; }
+nav .nav-logo-img { filter: none !important; }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  transition: color 0.3s;
+  position: relative;
+}
+.nav-links a:hover { color: #fff; }
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+.nav-links a:hover::after { width: 100%; }
+
+.nav-cta {
+  padding: 10px 24px;
+  background: var(--accent);
+  color: white !important;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.nav-cta:hover {
+  background: var(--accent-bright) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px var(--accent-glow-strong);
+}
+.nav-cta::after { display: none !important; }
+
+/* Mobile nav toggle */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px;
+}
+.nav-toggle svg { width: 24px; height: 24px; }
+
+/* ─── HEADER CLIENT LOGO STRIP ───────── */
+.client-strip-wrap {
+  background: #0d0d0d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 0;
+  margin-top: 72px; /* below fixed nav */
+  overflow: hidden;
+}
+.client-strip {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  width: max-content;
+  animation: client-scroll 45s linear infinite;
+}
+.client-strip:hover { animation-play-state: paused; }
+.client-strip img {
+  height: 32px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+.client-strip img.dark-ok { filter: none; }
+
+/* Our Clients section – logos in original colours */
+.clients-section {
+  background: linear-gradient(180deg, #f5f5f7 0%, #eaecef 100%);
+}
+.clients-section .section-label,
+.clients-section .section-title,
+.clients-section .section-subtitle { color: #1a1a1a; }
+.clients-strip-outer {
+  overflow: hidden;
+  padding: 24px 0;
+  margin-top: 24px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+.clients-strip-colorful img {
+  filter: none;
+  opacity: 1;
+  height: 36px;
+}
+@keyframes client-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── HERO ───────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding-top: 72px;
+}
+
+.hero-glow {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.2;
+  pointer-events: none;
+}
+.hero-glow-1 {
+  top: -200px;
+  right: -200px;
+  background: var(--accent);
+  opacity: 0.15;
+}
+.hero-glow-2 {
+  bottom: -300px;
+  left: -200px;
+  background: var(--purple);
+  opacity: 0.12;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 8px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+  animation: fadeInUp 0.8s ease both;
+}
+.hero-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-dot 2s ease infinite;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 6vw, 80px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 28px;
+  animation: fadeInUp 0.8s 0.1s ease both;
+}
+.hero h1 .highlight {
+  background: linear-gradient(135deg, var(--accent-bright), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-desc {
+  font-size: 19px;
+  color: var(--text-muted);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 44px;
+  animation: fadeInUp 0.8s 0.2s ease both;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.8s 0.3s ease both;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+  border: none;
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 16px var(--accent-glow-strong);
+}
+.btn-primary:hover {
+  background: var(--accent-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px var(--accent-glow-strong);
+}
+.btn-secondary {
+  background: var(--glass);
+  color: var(--text);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  animation: fadeInUp 0.8s 0.4s ease both;
+}
+.hero-stat-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.hero-stat-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+/* ─── SERVICES OVERVIEW ──────────────── */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 44px;
+}
+
+.service-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 40px 32px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  box-shadow: var(--shadow);
+}
+.service-card:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-card-hover);
+}
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent)), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.service-card:hover::before { opacity: 1; }
+
+.service-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  font-size: 22px;
+}
+.service-card:nth-child(1) .service-icon {
+  background: var(--accent-glow);
+  color: var(--accent-bright);
+}
+.service-card:nth-child(1) { --card-accent: var(--accent); }
+.service-card:nth-child(2) .service-icon {
+  background: var(--green-glow);
+  color: var(--green);
+}
+.service-card:nth-child(2) { --card-accent: var(--green); }
+.service-card:nth-child(3) .service-icon {
+  background: var(--purple-glow);
+  color: var(--purple);
+}
+.service-card:nth-child(3) { --card-accent: var(--purple); }
+
+.service-card h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.service-card p {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.service-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.service-card li {
+  font-size: 14px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.service-card li::before {
+  content: '→';
+  color: var(--card-accent, var(--accent));
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.service-card .learn-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--card-accent, var(--accent));
+  text-decoration: none;
+  transition: gap 0.3s;
+}
+.service-card .learn-more:hover { gap: 10px; }
+
+/* ─── MANAGED SERVICES DETAIL ────────── */
+.managed-detail { background: rgba(255, 255, 255, 0.5); }
+
+.managed-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+  margin-top: 44px;
+}
+
+.managed-features {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feature-item {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 28px;
+  transition: all 0.3s;
+  box-shadow: var(--shadow);
+}
+.feature-item:hover {
+  border-color: var(--border-accent);
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-lg);
+}
+.feature-item h4 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.feature-item h4 .feat-icon {
+  font-size: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-glow);
+}
+.feature-item p {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.7;
+  padding-left: 38px;
+}
+
+.managed-info-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 40px;
+  position: sticky;
+  top: 100px;
+  box-shadow: var(--shadow-lg);
+}
+.managed-info-card h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.info-row:last-of-type { border-bottom: none; }
+.info-label {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.info-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.info-highlight {
+  color: var(--accent-bright);
+  background: var(--accent-glow);
+  padding: 2px 10px;
+  border-radius: 6px;
+}
+
+/* ─── CONSULTING PROJECTS ──────────── */
+.consulting-flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 44px;
+}
+.flow-step {
+  position: relative;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s;
+  box-shadow: var(--shadow);
+}
+.flow-step:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-card-hover);
+}
+.flow-step-num {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--border-accent);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.flow-step h4 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.flow-step p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.flow-connector {
+  position: absolute;
+  top: 50%;
+  right: -24px;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 16px;
+  z-index: 2;
+}
+
+/* ─── HOW WE WORK (PROCESS) ─────────── */
+.process-section { background: rgba(255, 255, 255, 0.5); }
+
+.process-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 4px;
+  margin-top: 32px;
+  margin-bottom: 28px;
+  width: fit-content;
+  box-shadow: var(--shadow);
+}
+.process-tab {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  transition: all 0.3s;
+}
+.process-tab.active {
+  background: var(--accent);
+  color: white;
+}
+.process-tab:hover:not(.active) {
+  color: var(--text);
+  background: var(--bg-card-hover);
+}
+
+.process-content {
+  display: none;
+}
+.process-content.active { display: block; }
+
+.process-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.process-item {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+.process-item:hover {
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-lg);
+}
+.process-item h4 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.process-item p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ─── TEAM STRUCTURE ─────────────────── */
+.team-roles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 44px;
+}
+.role-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 36px 28px;
+  transition: all 0.3s;
+  box-shadow: var(--shadow);
+}
+.role-card:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-card-hover);
+}
+.role-badge {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.role-card:nth-child(1) .role-badge {
+  background: var(--accent-glow);
+  color: var(--accent-bright);
+}
+.role-card:nth-child(2) .role-badge {
+  background: var(--green-glow);
+  color: var(--green);
+}
+.role-card:nth-child(3) .role-badge {
+  background: var(--orange-glow);
+  color: var(--orange);
+}
+.role-card h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.role-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.role-card li {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  padding-left: 20px;
+  position: relative;
+}
+.role-card li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--text-dim);
+}
+
+/* ─── SLA / COMMITMENT ──────────────── */
+.sla-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 44px;
+}
+.sla-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 36px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  transition: all 0.3s;
+  box-shadow: var(--shadow);
+}
+.sla-card:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-card-hover);
+}
+.sla-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+  background: var(--accent-glow);
+}
+.sla-card h4 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.sla-card p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* ─── PRODUCTS / SAFEOPS ─────────────── */
+.products-section { background: rgba(255, 255, 255, 0.5); }
+.products-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 44px;
+}
+.product-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 44px 36px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s;
+  box-shadow: var(--shadow);
+}
+.product-card:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-card-hover);
+}
+.product-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.08;
+  pointer-events: none;
+}
+.product-card:nth-child(1)::after { background: var(--green); }
+.product-card:nth-child(2)::after { background: var(--purple); }
+
+.product-tag {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  background: var(--green-glow);
+  color: var(--green);
+}
+.product-card:nth-child(2) .product-tag {
+  background: var(--purple-glow);
+  color: var(--purple);
+}
+.product-card h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.product-card > p {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.product-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.product-features li {
+  font-size: 14px;
+  color: var(--text-muted);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.product-features li::before {
+  content: '✓';
+  color: var(--green);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* ─── CONVERSION METRIC ──────────────── */
+.metric-banner {
+  background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 48px;
+  text-align: center;
+  margin-top: 48px;
+  box-shadow: var(--shadow-lg);
+}
+.metric-value {
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-bright), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.metric-label {
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+/* ─── CTA SECTION ────────────────────── */
+.cta-section {
+  text-align: center;
+  padding: 96px 0;
+  position: relative;
+}
+.cta-glow {
+  position: absolute;
+  width: 600px;
+  height: 400px;
+  border-radius: 50%;
+  background: var(--accent);
+  filter: blur(160px);
+  opacity: 0.12;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.cta-section .section-title {
+  max-width: 600px;
+  margin: 0 auto 20px;
+}
+.cta-section .section-subtitle {
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+/* ─── FOOTER ─────────────────────────── */
+footer {
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glass-border);
+  padding: 48px 0 32px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 36px;
+}
+.footer-brand p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 16px;
+  line-height: 1.7;
+  max-width: 300px;
+}
+.footer-col h4 {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+.footer-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-col a {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.footer-col a:hover { color: var(--text); }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* ─── ANIMATIONS ─────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── ABOUT OPSLINE ──────────────────── */
+.about-section {
+  padding: 64px 0;
+  position: relative;
+}
+.about-inner {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.about-section .section-label { justify-content: center; }
+.about-section .section-label::before { display: none; }
+.about-headline {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.about-tagline {
+  font-size: 17px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+.about-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.about-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s, box-shadow 0.3s;
+  box-shadow: var(--shadow);
+}
+.reveal.visible .about-pill {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal.visible .about-pill:nth-child(1) { transition-delay: 0.05s; }
+.reveal.visible .about-pill:nth-child(2) { transition-delay: 0.12s; }
+.reveal.visible .about-pill:nth-child(3) { transition-delay: 0.19s; }
+.reveal.visible .about-pill:nth-child(4) { transition-delay: 0.26s; }
+.reveal.visible .about-pill:nth-child(5) { transition-delay: 0.33s; }
+.about-pill:hover {
+  border-color: var(--border-accent);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+/* ─── RESPONSIVE ─────────────────────── */
+@media (max-width: 1024px) {
+  .services-grid, .team-roles { grid-template-columns: 1fr 1fr; }
+  .consulting-flow { grid-template-columns: 1fr 1fr; }
+  .flow-connector { display: none; }
+  .managed-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .container, .container-wide { padding: 0 20px; }
+  .section { padding: 64px 0; }
+  .about-section { padding: 48px 0; }
+  .about-pill { font-size: 13px; padding: 8px 16px; }
+  .nav-links { display: none; }
+  .nav-toggle { display: block; }
+  .services-grid, .team-roles, .sla-grid, .products-grid, .process-grid {
+    grid-template-columns: 1fr;
+  }
+  .consulting-flow { grid-template-columns: 1fr; }
+  .hero-stats { flex-direction: column; gap: 24px; }
+  .hero-actions { flex-direction: column; }
+  .btn { justify-content: center; }
+  .metric-banner { padding: 40px 24px; }
+  .metric-value { font-size: 48px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo"><img src="assets/opsline-logo.png" alt="OpsLine" class="nav-logo-img" /></a>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#managed">Managed DevOps</a></li>
+      <li><a href="#clients">Our Clients</a></li>
+      <li><a href="#consulting">Consulting</a></li>
+      <li><a href="#process">How We Work</a></li>
+      <li><a href="#products">Products</a></li>
+      <li><a href="#contact" class="nav-cta">Get Started</a></li>
+    </ul>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('show')" aria-label="Toggle menu">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="container hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Now offering SafeOps.io & InterPort
+    </div>
+    <h1>Your Infrastructure.<br>Our <span class="highlight">Expertise.</span></h1>
+    <p class="hero-desc">OpsLine delivers fully managed DevOps services, consulting projects, and automation platforms — so your engineering team can focus on building product, not managing infrastructure.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn btn-primary">Schedule a Consultation →</a>
+      <a href="#services" class="btn btn-secondary">Explore Services</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-value">>90%</div>
+        <div class="hero-stat-label">Project-to-Managed conversion</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">4–16 wk</div>
+        <div class="hero-stat-label">Consulting project timelines</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">24/7</div>
+        <div class="hero-stat-label">P0 outage support</div>
+      </div>
+      <div>
+        <div class="hero-stat-value">40–300</div>
+        <div class="hero-stat-label">Monthly commitment hours</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT OPSLINE -->
+<section class="about-section" id="about">
+  <div class="container">
+    <div class="about-inner reveal">
+      <div class="section-label">About OpsLine</div>
+      <h2 class="about-headline">DevOps as an extension of your team.</h2>
+      <p class="about-tagline">We run cloud, CI/CD, and 24/7 observability on the stack you use — so you ship product, not one-off scripts.</p>
+      <div class="about-pills">
+        <span class="about-pill">Ship production-grade infra</span>
+        <span class="about-pill">Embed with your team</span>
+        <span class="about-pill">Leverage automation</span>
+        <span class="about-pill">Clear SLAs</span>
+        <span class="about-pill">Predictable capacity</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES OVERVIEW -->
+<section class="section" id="services">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">What We Do</div>
+      <h2 class="section-title">Three Ways to Work<br>With OpsLine</h2>
+      <p class="section-subtitle">Managed DevOps, consulting to reach baseline, or tooling — we meet you where you are.</p>
+    </div>
+    <div class="services-grid reveal">
+
+      <!-- Card 1: Managed Services -->
+      <div class="service-card">
+        <div class="service-icon">⚙️</div>
+        <h3>Managed DevOps Services</h3>
+        <p>Our core offering. Dedicated DevOps engineers embedded in your team on a monthly retainer — planning sprints, deploying infrastructure, and keeping your systems healthy around the clock.</p>
+        <ul>
+          <li>40–300 hours/month commitment</li>
+          <li>Bi-weekly sprint planning (Agile/Kanban)</li>
+          <li>24/7 P0 outage response</li>
+          <li>Quarterly health reviews & roadmapping</li>
+          <li>Full integration with your team's tools & workflows</li>
+        </ul>
+        <a href="#managed" class="learn-more">Learn more →</a>
+      </div>
+
+      <!-- Card 2: Consulting Projects -->
+      <div class="service-card">
+        <div class="service-icon">🚀</div>
+        <h3>Consulting Projects</h3>
+        <p>Fixed-scope engagements to bring your infrastructure to DevOps baseline. We lift, shift, and automate — transforming manual operations into fully automated, industry-standard environments.</p>
+        <ul>
+          <li>4–16 week engagements</li>
+          <li>Lift-and-shift automation approach</li>
+          <li>Industry-standard toolsets & best practices</li>
+          <li>Team training & documentation included</li>
+          <li>Seamless path to Managed Services</li>
+        </ul>
+        <a href="#consulting" class="learn-more">Learn more →</a>
+      </div>
+
+      <!-- Card 3: Products -->
+      <div class="service-card">
+        <div class="service-icon">🛡️</div>
+        <h3>SafeOps.io & InterPort</h3>
+        <p>Purpose-built products that extend OpsLine's capabilities. SafeOps delivers security-focused operational tooling, while InterPort provides seamless infrastructure interconnection.</p>
+        <ul>
+          <li>SafeOps — Security-first operations platform</li>
+          <li>InterPort — Infrastructure interconnection layer</li>
+          <li>Integrates with managed service workflows</li>
+          <li>Built on real-world operational experience</li>
+        </ul>
+        <a href="#products" class="learn-more">Learn more →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MANAGED SERVICES DETAIL -->
+<section class="section managed-detail" id="managed">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Core Service</div>
+      <h2 class="section-title">Managed DevOps<br>That Scales With You</h2>
+      <p class="section-subtitle">We become an extension of your engineering team. Our managed service model is built on automation leverage, predictable capacity, and deep integration with your workflows.</p>
+    </div>
+
+    <div class="managed-grid reveal">
+      <div class="managed-features">
+        <div class="feature-item">
+          <h4><span class="feat-icon">📋</span> Sprint-Based Delivery</h4>
+          <p>Bi-weekly planning sessions with your team. We operate Agile meetings externally and Kanban internally, creating tickets with estimates during sprint planning and syncing everything via integrated Jira boards.</p>
+        </div>
+        <div class="feature-item">
+          <h4><span class="feat-icon">📐</span> Leverage-Based Estimation</h4>
+          <p>Our estimates reflect the value delivered, not just our effort. A MySQL cluster deployment that would take your team 40+ hours? We've done it before — we deliver the full automated solution and estimate accordingly.</p>
+        </div>
+        <div class="feature-item">
+          <h4><span class="feat-icon">🔄</span> Flexible Sprint Management</h4>
+          <p>Priorities shift — we adapt. If an emergency hits mid-sprint, we add the ticket, remove lower-priority work, and communicate clearly. Your momentum never stops.</p>
+        </div>
+        <div class="feature-item">
+          <h4><span class="feat-icon">📊</span> Quarterly Health Reviews</h4>
+          <p>Comprehensive reviews of delivered work, infrastructure health, monitoring improvements, backup validation, OS/software upgrades, and DR testing. Published reports with prioritized action items for the next quarter.</p>
+        </div>
+        <div class="feature-item">
+          <h4><span class="feat-icon">🚨</span> Incident Response & Post-Mortems</h4>
+          <p>When P0 outages hit, we document everything in real-time, timebox in 15-minute increments, escalate immediately, and always follow up with a structured post-mortem and permanent fix — including monitoring improvements.</p>
+        </div>
+        <div class="feature-item">
+          <h4><span class="feat-icon">🔒</span> Change Control</h4>
+          <p>All production changes are scheduled with your team. We enforce strict change windows — no production work after 9pm or on weekends without internal review. Non-production changes are announced to minimize development disruption.</p>
+        </div>
+      </div>
+
+      <div class="managed-info-card">
+        <h3>Engagement Model</h3>
+        <div class="info-row">
+          <span class="info-label">Commitment</span>
+          <span class="info-value">40–300 hrs/mo</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Contract</span>
+          <span class="info-value">Annual</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Sprint Cadence</span>
+          <span class="info-value">Bi-weekly</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Higher Commitment</span>
+          <span class="info-value info-highlight">≥160 hrs → weekly</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Engineer Ratio</span>
+          <span class="info-value">2–4 customers/eng</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Architect Ratio</span>
+          <span class="info-value">1 : 5 engineers</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Emergency SLA</span>
+          <span class="info-value info-highlight">1–2 hour response</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Non-Emergency SLA</span>
+          <span class="info-value">2–4 hour response</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">P0 Availability</span>
+          <span class="info-value info-highlight">24/7</span>
+        </div>
+        <div style="margin-top: 28px;">
+          <a href="#contact" class="btn btn-primary" style="width: 100%; justify-content: center;">Talk to Our Team →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUR CLIENTS -->
+<section class="section clients-section" id="clients">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Our Clients</div>
+      <h2 class="section-title">Trusted by Teams<br>Everywhere</h2>
+      <p class="section-subtitle">We partner with innovative companies to deliver reliable infrastructure and DevOps excellence.</p>
+    </div>
+    <div class="clients-strip-outer reveal">
+      <div class="client-strip clients-strip-colorful" aria-hidden="true">
+        <img src="images/clients/studysync.png" alt="StudySync" />
+        <img src="images/clients/ultralinq.png" alt="UltraLinQ" />
+        <img src="images/clients/updater.png" alt="updater" />
+        <img src="images/clients/wallaby.png" alt="walla.by" />
+        <img src="images/clients/adaptly.png" alt="Adaptly" />
+        <img src="images/clients/wework.png" alt="WeWork" />
+        <img src="images/clients/bread.png" alt="Bread" />
+        <img src="images/clients/fieldlens.png" alt="FIELDLENS" />
+        <img src="images/clients/ncm.png" alt="NCM" />
+        <img src="images/clients/kinnek.png" alt="Kinnek" />
+        <img src="images/clients/komodo-health.png" alt="Komodo Health" />
+        <img src="images/clients/quantuvis.png" alt="Quantuvis" />
+        <img src="images/clients/mev.png" alt="MEV" />
+        <img src="images/clients/signalpath.png" alt="SIGNALPATH" />
+        <img src="images/clients/real-brokerage.png" alt="real." />
+        <img src="images/clients/simplereach.png" alt="SimpleReach" />
+        <img src="images/clients/studysync.png" alt="" />
+        <img src="images/clients/ultralinq.png" alt="" />
+        <img src="images/clients/updater.png" alt="" />
+        <img src="images/clients/wallaby.png" alt="" />
+        <img src="images/clients/adaptly.png" alt="" />
+        <img src="images/clients/wework.png" alt="" />
+        <img src="images/clients/bread.png" alt="" />
+        <img src="images/clients/fieldlens.png" alt="" />
+        <img src="images/clients/ncm.png" alt="" />
+        <img src="images/clients/kinnek.png" alt="" />
+        <img src="images/clients/komodo-health.png" alt="" />
+        <img src="images/clients/quantuvis.png" alt="" />
+        <img src="images/clients/mev.png" alt="" />
+        <img src="images/clients/signalpath.png" alt="" />
+        <img src="images/clients/real-brokerage.png" alt="" />
+        <img src="images/clients/simplereach.png" alt="" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONSULTING PROJECTS -->
+<section class="section" id="consulting">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Onboarding Path</div>
+      <h2 class="section-title">From Manual Ops to<br>DevOps Baseline</h2>
+      <p class="section-subtitle">Our consulting projects are the bridge. We take your existing infrastructure — however it's set up — and fully automate it using industry-standard toolsets and best practices, getting you ready for Managed Services.</p>
+    </div>
+
+    <div class="consulting-flow reveal">
+      <div class="flow-step">
+        <div class="flow-step-num">01</div>
+        <h4>Discovery & Scoping</h4>
+        <p>We audit your current infrastructure, define a Statement of Work, break tasks into weekly sprint buckets, and set up a Jira project to track everything.</p>
+        <span class="flow-connector">→</span>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">02</div>
+        <h4>Lift & Automate</h4>
+        <p>Using our proven automation frameworks and deployment methods, we systematically automate your infrastructure — delivering code and value daily.</p>
+        <span class="flow-connector">→</span>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">03</div>
+        <h4>Train & Document</h4>
+        <p>The deliverable isn't just code — it's knowledge. We train your team (in-person when possible) and produce comprehensive documentation on every tool we deploy.</p>
+        <span class="flow-connector">→</span>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">04</div>
+        <h4>Managed Handoff</h4>
+        <p>With your infrastructure at DevOps baseline, you're ready for our Managed Services model. Over 90% of consulting customers make this transition.</p>
+      </div>
+    </div>
+
+    <div class="metric-banner reveal">
+      <div class="metric-value">>90%</div>
+      <div class="metric-label">of consulting project customers convert to Managed Services</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW WE WORK / PROCESS -->
+<section class="section process-section" id="process">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Our Process</div>
+      <h2 class="section-title">How We Deliver<br>Consistent Excellence</h2>
+      <p class="section-subtitle">Rigorous process meets operational flexibility. Here's how we ensure every customer gets expert-level DevOps, every sprint.</p>
+    </div>
+
+    <div class="reveal">
+      <div class="process-tabs">
+        <button class="process-tab active" onclick="switchTab(this, 'tab-delivery')">Delivery</button>
+        <button class="process-tab" onclick="switchTab(this, 'tab-quality')">Quality</button>
+        <button class="process-tab" onclick="switchTab(this, 'tab-communication')">Communication</button>
+        <button class="process-tab" onclick="switchTab(this, 'tab-incidents')">Incidents</button>
+      </div>
+
+      <div id="tab-delivery" class="process-content active">
+        <div class="process-grid">
+          <div class="process-item">
+            <h4>Multi-Customer Context Switching</h4>
+            <p>Engineers break their day into 2–3 focused chunks, ensuring all customers receive dedicated attention. Daily re-prioritization keeps work flowing smoothly across engagements.</p>
+          </div>
+          <div class="process-item">
+            <h4>Low-Hanging Fruit First</h4>
+            <p>We attack quick wins at the start of each sprint to build momentum and demonstrate progress. Complex work follows once the sprint rhythm is established.</p>
+          </div>
+          <div class="process-item">
+            <h4>Definition of Done</h4>
+            <p>A task is complete when: code is delivered and peer-reviewed, documentation is written, code is tested, it's deployed to target environments, and the ticket is updated with evidence.</p>
+          </div>
+          <div class="process-item">
+            <h4>Ticket Discipline</h4>
+            <p>Every ticket has a clear WHAT, WHY, HOW, and estimate. Comments track effort, blockers, and results. All completed work includes evidence — PRs, URLs, screenshots, or diagrams.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-quality" class="process-content">
+        <div class="process-grid">
+          <div class="process-item">
+            <h4>Architecture Review</h4>
+            <p>DevOps Architects review requirements, design frameworks, conduct code reviews, and verify high-level environment changes — ensuring quality and consistency across all customer deliverables.</p>
+          </div>
+          <div class="process-item">
+            <h4>Leverage Through Automation</h4>
+            <p>We reuse proven automation frameworks and deployment methods across projects, delivering faster while maintaining battle-tested quality. Every solution benefits from our cumulative experience.</p>
+          </div>
+          <div class="process-item">
+            <h4>Craftsmanship Mindset</h4>
+            <p>We build and maintain customer systems as if they were our own. Every environment reflects our standards — monitored, documented, automated, and resilient.</p>
+          </div>
+          <div class="process-item">
+            <h4>Continuous Improvement</h4>
+            <p>Quarterly health reviews, recurring maintenance tasks (backups, monitoring, OS upgrades, DR testing), and post-mortem permanent fixes ensure infrastructure only gets better over time.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-communication" class="process-content">
+        <div class="process-grid">
+          <div class="process-item">
+            <h4>Embedded Integration</h4>
+            <p>Engineers log into customer chat during active sprint work. We're accessible via email, Slack, and phone — responding within 2–4 hours for non-emergencies and 1–2 hours for urgent issues.</p>
+          </div>
+          <div class="process-item">
+            <h4>Proactive Updates</h4>
+            <p>We communicate delays early, provide sprint status in every planning session, and never leave customers in the dark. Vacation coverage is arranged and communicated in advance.</p>
+          </div>
+          <div class="process-item">
+            <h4>Sprint Grooming</h4>
+            <p>Before every planning meeting, PMs and engineers review current sprint status and prepare future work. Rescheduled planning sessions don't slow us down — we pull from the backlog and keep moving.</p>
+          </div>
+          <div class="process-item">
+            <h4>Change Communication</h4>
+            <p>Production changes are always scheduled with the customer. Non-production changes are announced in advance. We minimize disruption to development workflows at every turn.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-incidents" class="process-content">
+        <div class="process-grid">
+          <div class="process-item">
+            <h4>Real-Time Documentation</h4>
+            <p>From the moment we engage, we create a timeline in a shared document. Every action, discovery, and decision is logged as it happens — creating a complete incident record.</p>
+          </div>
+          <div class="process-item">
+            <h4>Timeboxed Escalation</h4>
+            <p>We timebox in 15-minute increments and escalate quickly. A shared video call and timeline document keep all stakeholders aligned throughout the incident.</p>
+          </div>
+          <div class="process-item">
+            <h4>Structured Post-Mortems</h4>
+            <p>Every outage triggers a standardized post-mortem process. We document root causes, timeline of events, and — most importantly — define permanent fixes including monitoring improvements.</p>
+          </div>
+          <div class="process-item">
+            <h4>Permanent Resolution</h4>
+            <p>Post-mortem tasks are prioritized into the very next sprint. We don't just recover — we improve. Every incident makes your infrastructure more resilient than before.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM STRUCTURE -->
+<section class="section" id="team">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Our Team</div>
+      <h2 class="section-title">Built to Deliver at Scale</h2>
+      <p class="section-subtitle">Our delivery team combines engineering execution, architectural oversight, and project management discipline. The 5:1 engineer-to-architect ratio ensures every engagement gets expert guidance.</p>
+    </div>
+
+    <div class="team-roles reveal">
+      <div class="role-card">
+        <span class="role-badge">Core</span>
+        <h3>DevOps Engineers</h3>
+        <ul>
+          <li>Own sprint planning, estimation, and delivery across 2–4 customer accounts</li>
+          <li>Maintain customer infrastructure health and availability</li>
+          <li>Provide P0 support per SLA commitments</li>
+          <li>Update tickets with evidence of all completed work</li>
+          <li>Proactively escalate when architect or PM support is needed</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <span class="role-badge">Architecture</span>
+        <h3>DevOps Architects</h3>
+        <ul>
+          <li>Gather requirements and design automation frameworks for projects and managed services</li>
+          <li>Conduct code reviews and verify high-level environment changes</li>
+          <li>Serve as backup engineers during overloads or emergencies</li>
+          <li>Support sales with project estimation and customer meetings</li>
+          <li>Guide engineers on leverage and best practices</li>
+        </ul>
+      </div>
+      <div class="role-card">
+        <span class="role-badge">Operations</span>
+        <h3>Project Managers</h3>
+        <ul>
+          <li>Run quarterly customer health reviews and roadmap planning</li>
+          <li>Help engineers prioritize daily work across multiple accounts</li>
+          <li>Enforce delivery processes and sprint management discipline</li>
+          <li>Manage tooling for process control, analytics, and capacity planning</li>
+          <li>Escalate process discrepancies to senior management</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLA / COMMITMENTS -->
+<section class="section" id="sla" style="background: rgba(255, 255, 255, 0.5);">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Our Commitment</div>
+      <h2 class="section-title">Service Level<br>Guarantees</h2>
+      <p class="section-subtitle">We hold ourselves to clear, measurable standards. When your business is on the line, you need a partner who shows up — fast.</p>
+    </div>
+
+    <div class="sla-grid reveal">
+      <div class="sla-card">
+        <div class="sla-icon">⚡</div>
+        <div>
+          <h4>Emergency Response: 1–2 Hours</h4>
+          <p>For P0 outages and business-critical issues, we respond within 1–2 hours via dedicated support email and phone channels. Technically available 24/7 for complete outages.</p>
+        </div>
+      </div>
+      <div class="sla-card">
+        <div class="sla-icon">💬</div>
+        <div>
+          <h4>Non-Emergency: 2–4 Hours</h4>
+          <p>Chat messages, emails, and standard requests get a response within 2–4 business hours. We can always say "not now" to non-urgent requests — but we'll schedule it for later.</p>
+        </div>
+      </div>
+      <div class="sla-card">
+        <div class="sla-icon">📅</div>
+        <div>
+          <h4>Predictable Capacity</h4>
+          <p>Monthly commitment hours are planned, not ad-hoc. We factor in sprint capacity formulas, emergency buffers (~10%), and manage workload to ensure consistent delivery.</p>
+        </div>
+      </div>
+      <div class="sla-card">
+        <div class="sla-icon">🔁</div>
+        <div>
+          <h4>Sprint Overflow Protection</h4>
+          <p>If an emergency exceeds the monthly commitment, we borrow from the next sprint. Conversely, if we can't finish work, we communicate early and carry tickets forward with adjusted estimates.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="section products-section" id="products">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Products</div>
+      <h2 class="section-title">Tools Built From<br>Operational Reality</h2>
+      <p class="section-subtitle">Born from years of managing real infrastructure at scale, our products extend OpsLine's operational DNA into purpose-built platforms.</p>
+    </div>
+
+    <div class="products-grid reveal">
+      <div class="product-card">
+        <div class="product-tag">Security Operations</div>
+        <h3>SafeOps.io</h3>
+        <p>A security-first operations platform designed to bring operational safety, compliance, and visibility into your DevOps workflows. Built for teams who can't afford to choose between speed and security.</p>
+        <ul class="product-features">
+          <li>Security-focused operational monitoring</li>
+          <li>Compliance workflow automation</li>
+          <li>Risk visibility across infrastructure</li>
+          <li>Integrates with existing CI/CD pipelines</li>
+        </ul>
+      </div>
+      <div class="product-card">
+        <div class="product-tag">Interconnection</div>
+        <h3>InterPort</h3>
+        <p>A seamless infrastructure interconnection layer that simplifies how your services, environments, and clouds communicate. Built for complex, multi-environment architectures.</p>
+        <ul class="product-features">
+          <li>Multi-cloud infrastructure connectivity</li>
+          <li>Simplified service interconnection</li>
+          <li>Environment-aware routing</li>
+          <li>Designed for scale and resilience</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section cta-section" id="contact">
+  <div class="cta-glow"></div>
+  <div class="container" style="position: relative; z-index: 2;">
+    <div class="reveal">
+      <div class="section-label" style="justify-content: center;">Get Started</div>
+      <h2 class="section-title">Let's Build Your<br>DevOps Foundation</h2>
+      <p class="section-subtitle">Whether you need full managed DevOps, a consulting engagement to reach baseline, or just want to explore SafeOps and InterPort — we're ready to talk.</p>
+      <div class="hero-actions" style="justify-content: center;">
+        <a href="mailto:info@opsline.com" class="btn btn-primary">Contact Us →</a>
+        <a href="#services" class="btn btn-secondary">Review Our Services</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo"><img src="assets/opsline-logo.png" alt="OpsLine" class="nav-logo-img" /></a>
+        <p>Enterprise DevOps services — managed, consulted, and delivered. We become your team's DevOps backbone so you can focus on what matters: building great products.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#managed">Managed DevOps</a></li>
+          <li><a href="#consulting">Consulting Projects</a></li>
+          <li><a href="#products">SafeOps.io</a></li>
+          <li><a href="#products">InterPort</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#clients">Our Clients</a></li>
+          <li><a href="#team">Our Team</a></li>
+          <li><a href="#process">How We Work</a></li>
+          <li><a href="#sla">SLAs & Commitments</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="mailto:info@opsline.com">info@opsline.com</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">Twitter/X</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OpsLine. All rights reserved.</span>
+      <span>DevOps. Managed. Delivered.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Navbar scroll effect
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// Reveal on scroll
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => observer.observe(el));
+
+// Process tabs
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.process-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.process-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+</body>
+</html>
