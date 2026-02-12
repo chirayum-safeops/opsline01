@@ -579,12 +579,36 @@ nav .nav-logo-img { filter: none !important; }
   justify-content: center;
   background: var(--accent-glow);
 }
-.feature-item p {
+
+/* Feature bullet list */
+.feature-points {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 0 38px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.feature-points li {
+  position: relative;
   color: var(--text-muted);
   font-size: 14px;
-  line-height: 1.7;
-  padding-left: 38px;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: featureBulletIn 0.45s ease forwards;
 }
+.feature-points li::before {
+  content: '•';
+  position: absolute;
+  left: -12px;
+  color: var(--accent-bright);
+  font-size: 12px;
+}
+.feature-points li:nth-child(1) { animation-delay: 0.04s; }
+.feature-points li:nth-child(2) { animation-delay: 0.09s; }
+.feature-points li:nth-child(3) { animation-delay: 0.14s; }
+.feature-points li:nth-child(4) { animation-delay: 0.19s; }
 
 .managed-info-card {
   background: var(--bg-card);
@@ -1085,6 +1109,17 @@ footer {
   50% { opacity: 0.4; }
 }
 
+@keyframes featureBulletIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(32px);
@@ -1333,27 +1368,57 @@ footer {
       <div class="managed-features">
         <div class="feature-item">
           <h4><span class="feat-icon">📋</span> Sprint-Based Delivery</h4>
-          <p>Bi-weekly planning sessions with your team. We operate Agile meetings externally and Kanban internally, creating tickets with estimates during sprint planning and syncing everything via integrated Jira boards.</p>
+          <ul class="feature-points">
+            <li>Bi-weekly planning sessions with your team.</li>
+            <li>Agile ceremonies with you, Kanban workflows internally.</li>
+            <li>Tickets created with clear estimates during sprint planning.</li>
+            <li>Work synced end-to-end through integrated Jira boards.</li>
+          </ul>
         </div>
         <div class="feature-item">
           <h4><span class="feat-icon">📐</span> Leverage-Based Estimation</h4>
-          <p>Our estimates reflect the value delivered, not just our effort. A MySQL cluster deployment that would take your team 40+ hours? We've done it before — we deliver the full automated solution and estimate accordingly.</p>
+          <ul class="feature-points">
+            <li>Estimates are based on delivered value, not raw hours.</li>
+            <li>We reuse proven patterns for complex infrastructure like MySQL clusters.</li>
+            <li>Work that would take your team 40+ hours is delivered as an automated solution.</li>
+            <li>Effort reflects leverage from past experience and internal tooling.</li>
+          </ul>
         </div>
         <div class="feature-item">
           <h4><span class="feat-icon">🔄</span> Flexible Sprint Management</h4>
-          <p>Priorities shift — we adapt. If an emergency hits mid-sprint, we add the ticket, remove lower-priority work, and communicate clearly. Your momentum never stops.</p>
+          <ul class="feature-points">
+            <li>Designed for shifting priorities without losing momentum.</li>
+            <li>Emergency work is added mid-sprint with matching scope removed.</li>
+            <li>Lower-priority tasks are re-ordered instead of quietly dropped.</li>
+            <li>Clear communication on what changed, why, and what moves next.</li>
+          </ul>
         </div>
         <div class="feature-item">
           <h4><span class="feat-icon">📊</span> Quarterly Health Reviews</h4>
-          <p>Comprehensive reviews of delivered work, infrastructure health, monitoring improvements, backup validation, OS/software upgrades, and DR testing. Published reports with prioritized action items for the next quarter.</p>
+          <ul class="feature-points">
+            <li>Quarterly deep dives into delivered work and infrastructure health.</li>
+            <li>Monitoring improvements, backup validation, and DR testing included.</li>
+            <li>OS and software upgrades tracked as part of regular maintenance.</li>
+            <li>Published reports with prioritized action items for the next quarter.</li>
+          </ul>
         </div>
         <div class="feature-item">
           <h4><span class="feat-icon">🚨</span> Incident Response & Post-Mortems</h4>
-          <p>When P0 outages hit, we document everything in real-time, timebox in 15-minute increments, escalate immediately, and always follow up with a structured post-mortem and permanent fix — including monitoring improvements.</p>
+          <ul class="feature-points">
+            <li>Real-time documentation from the moment a P0 incident starts.</li>
+            <li>Work is timeboxed in 15-minute increments with clear escalation paths.</li>
+            <li>Structured post-mortems capture root cause and full event timelines.</li>
+            <li>Permanent fixes always include monitoring and alerting improvements.</li>
+          </ul>
         </div>
         <div class="feature-item">
           <h4><span class="feat-icon">🔒</span> Change Control</h4>
-          <p>All production changes are scheduled with your team. We enforce strict change windows — no production work after 9pm or on weekends without internal review. Non-production changes are announced to minimize development disruption.</p>
+          <ul class="feature-points">
+            <li>All production changes are scheduled and agreed with your team.</li>
+            <li>Strict change windows: no production work after 9pm or on weekends without review.</li>
+            <li>Non-production changes are announced in advance to your developers.</li>
+            <li>Change control is designed to reduce risk without slowing delivery.</li>
+          </ul>
         </div>
       </div>
 
